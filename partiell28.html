@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Partielle Übersetzung (10 Beispiele)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --highlight-bg: #fff8e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        /* Liste der Aufgaben */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Deutscher Satz (Quelle) */
+        .german-sentence {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .german-sentence::before {
+            content: "🇩🇪";
+            font-size: 1.2rem;
+        }
+
+        /* Russischer Satz (Ziel) */
+        .russian-sentence {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* Wichtig für Responsivität */
+            gap: 8px;
+            background-color: #fafafa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .russian-sentence::before {
+            content: "🇷🇺";
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        /* Dropdown Styling */
+        select {
+            padding: 8px 12px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            background-color: white;
+            cursor: pointer;
+            min-width: 140px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Feedback Styles */
+        select.correct {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        select.incorrect {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        /* Visuelles Feedback an der Karte */
+        .task-card.card-correct { border-left-color: var(--success-color); }
+        .task-card.card-wrong { border-left-color: var(--error-color); }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+        
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+        
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .russian-sentence { font-size: 1.1rem; }
+            select { width: 100%; margin-top: 5px; margin-bottom: 5px; }
+            .controls { flex-direction: column; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Partielle Übersetzung</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Wähle das passende russische Verb für die Lücke aus. Achte auf den Kontext (Fähigkeit vs. Möglichkeit) und die richtige Form.</p>
+    </div>
+
+    <div class="task-list" id="taskList">
+        <!-- JS generiert Inhalt -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    /*
+        Datenstruktur:
+        de: Deutscher Satz
+        pre: Russischer Satzteil VOR der Lücke
+        post: Russischer Satzteil NACH der Lücke
+        correct: Richtige Lösung
+        distractors: Falsche Antworten (fürs Dropdown)
+    */
+    const tasks = [
+        {
+            id: 1,
+            de: "Wir <strong>können</strong> morgen ins Kino gehen. (Plan/Möglichkeit)",
+            pre: "Мы", post: "пойти в кино завтра.",
+            correct: "можем",
+            distractors: ["умеем", "могут", "умеют"]
+        },
+        {
+            id: 2,
+            de: "Ich <strong>kann</strong> nicht lesen. (Ich habe es nie gelernt)",
+            pre: "Я не", post: "читать.",
+            correct: "умею",
+            distractors: ["могу", "умеешь", "можешь"]
+        },
+        {
+            id: 3,
+            de: "Entschuldigung, <strong>können</strong> Sie mir sagen, wo die Metro ist?",
+            pre: "Извините, вы", post: "мне сказать, где метро?",
+            correct: "можете",
+            distractors: ["умеете", "можем", "умеют"]
+        },
+        {
+            id: 4,
+            de: "Er <strong>kann</strong> sehr gut Gitarre spielen.",
+            pre: "Он очень хорошо", post: "играть на гитаре.",
+            correct: "умеет",
+            distractors: ["может", "умеют", "могут"]
+        },
+        {
+            id: 5,
+            de: "<strong>Kannst</strong> du mir deinen Stift geben?",
+            pre: "Ты", post: "дать мне твою ручку?",
+            correct: "можешь",
+            distractors: ["умеешь", "могу", "умею"]
+        },
+        {
+            id: 6,
+            de: "Kinder <strong>können</strong> noch nicht Auto fahren.",
+            pre: "Дети ещё не", post: "водить машину.",
+            correct: "умеют",
+            distractors: ["могут", "умеем", "можем"]
+        },
+        {
+            id: 7,
+            de: "Heute <strong>kann</strong> ich nicht arbeiten, ich bin krank.",
+            pre: "Сегодня я не", post: "работать, я болен.",
+            correct: "могу",
+            distractors: ["умею", "может", "умеет"]
+        },
+        {
+            id: 8,
+            de: "Meine Oma <strong>kann</strong> leckere Piroggen backen.",
+            pre: "Моя бабушка", post: "печь вкусные пироги.",
+            correct: "умеет",
+            distractors: ["может", "умеют", "могут"]
+        },
+        {
+            id: 9,
+            de: "Sie (die Nachbarn) <strong>können</strong> uns nicht hören. (Es ist zu laut)",
+            pre: "Они не", post: "нас слышать.",
+            correct: "могут",
+            distractors: ["умеют", "можем", "умеет"]
+        },
+        {
+            id: 10,
+            de: "<strong>Könnt</strong> ihr Englisch sprechen?",
+            pre: "Вы", post: "говорить по-английски?",
+            correct: "умеете",
+            distractors: ["можете", "умеем", "могут"]
+        }
+    ];
+
+    const container = document.getElementById('taskList');
+
+    // Hilfsfunktion zum Mischen der Optionen
+    function shuffleOptions(correct, distractors) {
+        let all = [correct, ...distractors];
+        for (let i = all.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [all[i], all[j]] = [all[j], all[i]];
+        }
+        return all;
+    }
+
+    function init() {
+        container.innerHTML = "";
+        tasks.forEach(t => {
+            const options = shuffleOptions(t.correct, t.distractors);
+            
+            // Dropdown HTML bauen
+            let optionsHTML = `<option value="">...</option>`;
+            options.forEach(opt => {
+                optionsHTML += `<option value="${opt}">${opt}</option>`;
+            });
+
+            const card = document.createElement('div');
+            card.className = "task-card";
+            card.id = `card-${t.id}`;
+
+            card.innerHTML = `
+                <div class="german-sentence">${t.de}</div>
+                <div class="russian-sentence">
+                    <span>${t.pre}</span>
+                    <select id="select-${t.id}" data-solution="${t.correct}" onchange="checkAnswer(this)">
+                        ${optionsHTML}
+                    </select>
+                    <span>${t.post}</span>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Sofort-Feedback Funktion
+    function checkAnswer(selectElement) {
+        const card = selectElement.closest('.task-card');
+        const userVal = selectElement.value;
+        const solution = selectElement.getAttribute('data-solution');
+
+        // Reset
+        selectElement.classList.remove('correct', 'incorrect');
+        card.classList.remove('card-correct', 'card-wrong');
+
+        if (userVal === "") return;
+
+        if (userVal === solution) {
+            selectElement.classList.add('correct');
+            card.classList.add('card-correct');
+        } else {
+            selectElement.classList.add('incorrect');
+            card.classList.add('card-wrong');
+        }
+    }
+
+    function resetAll() {
+        // Alle Selects zurücksetzen
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = "";
+            sel.classList.remove('correct', 'incorrect');
+            const card = sel.closest('.task-card');
+            card.classList.remove('card-correct', 'card-wrong');
+        });
+    }
+
+    function solveAll() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = sel.getAttribute('data-solution');
+            
+            // Manuelles Triggern des Feedbacks (ohne onchange Event)
+            sel.classList.remove('incorrect');
+            sel.classList.add('correct');
+            const card = sel.closest('.task-card');
+            card.classList.remove('card-wrong');
+            card.classList.add('card-correct');
+        });
+    }
+
+    // Start
+    init();
+
+</script>
+
+</body>
+</html>

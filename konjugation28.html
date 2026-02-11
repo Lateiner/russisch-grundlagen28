@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Konjugationstabellen (Drill)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --accent-color: #ff9800;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .highlight-note {
+            background-color: #fff3e0;
+            color: #e65100;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* Layout für die Tabellen */
+        .tables-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .verb-section {
+            flex: 1;
+            min-width: 300px; /* Damit es auf Handy umbricht */
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid transparent;
+        }
+
+        /* Farbcodierung der Verben */
+        .section-moch { border-top-color: var(--accent-color); }
+        .section-umet { border-top-color: var(--primary-color); }
+
+        .verb-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .verb-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Tabellen-Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            color: #888;
+            font-weight: normal;
+            font-size: 0.9rem;
+            width: 80px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pronoun {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Dropdown Styling */
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            background-color: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        /* Feedback Styles */
+        select.correct {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        select.incorrect {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        /* Visuelle Hinweise auf Unregelmäßigkeit */
+        .stem-change-hint {
+            position: relative;
+        }
+        .stem-change-hint::after {
+            content: "⚠️ g/ž";
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            color: var(--accent-color);
+            opacity: 0.7;
+            pointer-events: none;
+            display: none; /* Wird nur auf großen Screens angezeigt, wenn nötig */
+        }
+        @media(min-width: 768px) {
+            .section-moch .stem-change-hint::after { display: block; }
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .verb-section { min-width: 100%; padding: 15px; }
+            .controls { flex-direction: column; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Raster-Konjugation</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Vervollständige die Tabellen. Wähle die passende Form aus dem Dropdown-Menü.</p>
+        <p class="highlight-note">Achtung bei „мочь“: Achte auf den Wechsel zwischen <strong>г</strong> und <strong>ж</strong>!</p>
+    </div>
+
+    <div class="tables-wrapper">
+        
+        <!-- Tabelle 1: МОЧЬ -->
+        <div class="verb-section section-moch">
+            <div class="verb-title">МОЧЬ</div>
+            <div class="verb-subtitle">können (Möglichkeit)</div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Person</th>
+                        <th>Form</th>
+                    </tr>
+                </thead>
+                <tbody id="table-moch">
+                    <!-- JS füllt dies -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabelle 2: УМЕТЬ -->
+        <div class="verb-section section-umet">
+            <div class="verb-title">УМЕТЬ</div>
+            <div class="verb-subtitle">können (Fähigkeit)</div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Person</th>
+                        <th>Form</th>
+                    </tr>
+                </thead>
+                <tbody id="table-umet">
+                    <!-- JS füllt dies -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Daten für die Verben
+    
+    /* 
+       Anmerkung zur Logik:
+       Für ein gutes Dropdown-Erlebnis biete ich alle Formen des jeweiligen Verbs
+       als Optionen an. Der Schüler muss die richtige dem Pronomen zuordnen.
+    */
+
+    const pronouns = ["Я", "Ты", "Он / Она", "Мы", "Вы", "Они"];
+
+    const verbMoch = {
+        id: "moch",
+        forms: ["могу", "можешь", "может", "можем", "можете", "могут"],
+        // Markiert, welche Formen "hart" (g) oder "weich" (ž) sind für CSS-Styling (optional)
+        isIrregular: [true, false, false, false, false, true] 
+    };
+
+    const verbUmet = {
+        id: "umet",
+        forms: ["умею", "умеешь", "умеет", "умеем", "умеете", "умеют"],
+        isIrregular: [false, false, false, false, false, false]
+    };
+
+    // Funktion zum Mischen der Optionen (damit es nicht zu einfach ist)
+    function shuffleArray(array) {
+        let curId = array.length;
+        // Kopie erstellen, um Original nicht zu ändern
+        let arrCopy = [...array]; 
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = arrCopy[curId];
+            arrCopy[curId] = arrCopy[randId];
+            arrCopy[randId] = tmp;
+        }
+        return arrCopy;
+    }
+
+    function buildTable(verbObj, tableId) {
+        const tbody = document.getElementById(tableId);
+        tbody.innerHTML = "";
+        
+        // Optionen einmalig mischen für dieses Verb
+        const options = shuffleArray(verbObj.forms);
+
+        // HTML für Dropdown Optionen
+        let optionsHTML = `<option value="">---</option>`;
+        options.forEach(opt => {
+            optionsHTML += `<option value="${opt}">${opt}</option>`;
+        });
+
+        pronouns.forEach((pronoun, index) => {
+            const correctForm = verbObj.forms[index];
+            const isIrregular = verbObj.isIrregular[index]; // True für "могу" und "могут"
+            
+            const tr = document.createElement('tr');
+            
+            // Bei unregelmäßigen Formen könnte man CSS Klassen hinzufügen
+            // Hier nutzen wir es nur intern oder für subtile Hinweise
+            
+            tr.innerHTML = `
+                <td><span class="pronoun">${pronoun}</span></td>
+                <td class="${isIrregular ? '' : ''}">
+                    <select data-solution="${correctForm}" onchange="checkInput(this)">
+                        ${optionsHTML}
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Sofort-Feedback
+    function checkInput(selectElement) {
+        const solution = selectElement.getAttribute('data-solution');
+        const userVal = selectElement.value;
+
+        selectElement.classList.remove('correct', 'incorrect');
+
+        if (userVal === "") return;
+
+        if (userVal === solution) {
+            selectElement.classList.add('correct');
+        } else {
+            selectElement.classList.add('incorrect');
+        }
+    }
+
+    function init() {
+        buildTable(verbMoch, 'table-moch');
+        buildTable(verbUmet, 'table-umet');
+    }
+
+    function resetAll() {
+        // Alle Selects zurücksetzen
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = "";
+            sel.classList.remove('correct', 'incorrect');
+        });
+    }
+
+    function solveAll() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = sel.getAttribute('data-solution');
+            sel.classList.remove('incorrect');
+            sel.classList.add('correct');
+        });
+    }
+
+    // Starten
+    init();
+
+</script>
+
+</body>
+</html>

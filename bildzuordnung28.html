@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Bild-Zuordnung (Sofort-Feedback)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --btn-hover: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        /* Responsive Grid für die Karten */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: transform 0.2s, background-color 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .visual-container {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .situation-desc {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .situation-sub {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .option-group {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        /* Deaktiviert Buttons nach Auswahl */
+        .card.solved .option-group {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .option-btn {
+            flex: 1;
+            padding: 12px 5px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option-btn span.rus {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            margin-top: 3px;
+        }
+
+        /* Nur Buttons, die noch nicht gelöst sind, haben einen Hover-Effekt */
+        .card:not(.solved) .option-btn:hover {
+            background-color: var(--btn-hover);
+            border-color: #bbb;
+        }
+
+        /* Feedback Styles */
+        .card.correct { border-color: var(--success-color); }
+        .card.wrong { border-color: var(--error-color); }
+
+        .option-btn.correct-mark {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+        .option-btn.correct-mark span.rus { color: white; }
+
+        .option-btn.wrong-mark {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+        .option-btn.wrong-mark span.rus { color: white; }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s, opacity 0.2s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .visual-container { font-size: 3.5rem; }
+            .option-group { flex-direction: row; }
+            .controls { flex-direction: column; align-items: stretch; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Bild-Zuordnung: мочь oder уметь?</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Klicke auf die passende Option für jede Situation. Du erhältst sofort Feedback!</p>
+    </div>
+
+    <div class="grid-container" id="gridArea">
+        <!-- Karten werden per JS eingefügt -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Datenstruktur für 10 Aufgaben
+    const tasks = [
+        { id: 1, emoji: "🎻", title: "Geige spielen", desc: "Er hat 5 Jahre geübt.", solution: "skill" },
+        { id: 2, emoji: "🚪🔒", title: "Tür verschlossen", desc: "Ich habe keinen Schlüssel.", solution: "situation" },
+        { id: 3, emoji: "🏊‍♀️", title: "Schwimmen", desc: "Sie hat den Freischwimmer gemacht.", solution: "skill" },
+        { id: 4, emoji: "🤒", title: "Krank im Bett", desc: "Er kann heute nicht zur Arbeit.", solution: "situation" },
+        { id: 5, emoji: "♟️", title: "Schach spielen", desc: "Kennst du die Regeln?", solution: "skill" },
+        { id: 6, emoji: "💸", title: "Kein Geld", desc: "Wir können den Ferrari nicht kaufen.", solution: "situation" },
+        { id: 7, emoji: "🗣️🇫🇷", title: "Französisch", desc: "Sie spricht die Sprache fließend.", solution: "skill" },
+        { id: 8, emoji: "🌃", title: "Es ist dunkel", desc: "Ich kann ohne Licht nicht lesen.", solution: "situation" },
+        { id: 9, emoji: "🚗", title: "Auto fahren", desc: "Er hat den Führerschein gemacht.", solution: "skill" },
+        { id: 10, emoji: "🏃🕒", title: "Keine Zeit", desc: "Ich muss weg, ich kann nicht bleiben.", solution: "situation" }
+    ];
+
+    const grid = document.getElementById('gridArea');
+
+    // Initialisierung: Karten erstellen
+    function init() {
+        grid.innerHTML = "";
+        tasks.forEach(task => {
+            const card = document.createElement('div');
+            card.className = "card";
+            card.id = `card-${task.id}`;
+            card.setAttribute('data-solution', task.solution);
+
+            card.innerHTML = `
+                <div class="visual-container">${task.emoji}</div>
+                <div class="situation-desc">${task.title}</div>
+                <div class="situation-sub">${task.desc}</div>
+                <div class="option-group">
+                    <button class="option-btn" data-type="skill" onclick="checkAnswer(${task.id}, 'skill', this)">
+                        Skill <span class="rus">(уметь)</span>
+                    </button>
+                    <button class="option-btn" data-type="situation" onclick="checkAnswer(${task.id}, 'situation', this)">
+                        Situation <span class="rus">(мочь)</span>
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Interaktion: User wählt eine Option und bekommt SOFORT Feedback
+    function checkAnswer(id, userChoice, clickedButton) {
+        const card = document.getElementById(`card-${id}`);
+        // Verhindern, dass eine bereits gelöste Karte erneut beantwortet wird
+        if (card.classList.contains('solved')) return;
+
+        card.classList.add('solved'); // Karte als "beantwortet" markieren
+        const solution = card.getAttribute('data-solution');
+
+        if (userChoice === solution) {
+            // Richtig
+            card.classList.add('correct');
+            clickedButton.classList.add('correct-mark');
+        } else {
+            // Falsch
+            card.classList.add('wrong');
+            clickedButton.classList.add('wrong-mark');
+            
+            // Die richtige Lösung zusätzlich hervorheben
+            const correctButton = card.querySelector(`.option-btn[data-type="${solution}"]`);
+            correctButton.classList.add('correct-mark');
+        }
+    }
+
+    // Alles zurücksetzen
+    function resetAll() {
+        // Alternative: Neu initialisieren ist am einfachsten
+        init();
+    }
+
+    // Lösung anzeigen
+    function solveAll() {
+        tasks.forEach(task => {
+            const card = document.getElementById(`card-${task.id}`);
+            if (card.classList.contains('solved')) return; // Bereits gelöste nicht überschreiben
+            
+            card.classList.add('solved', 'correct');
+            
+            const correctButton = card.querySelector(`.option-btn[data-type="${task.solution}"]`);
+            correctButton.classList.add('correct-mark');
+        });
+    }
+
+    // Starten
+    init();
+
+</script>
+
+</body>
+</html>

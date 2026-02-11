@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Formen Drill mit Sätzen</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        /* Liste der Sätze */
+        .drill-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .drill-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid transparent;
+            display: flex;
+            flex-direction: column; /* Mobil-First Ansatz */
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .drill-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .sentence-container {
+            font-size: 1.25rem;
+            color: #2c3e50;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sentence-part {
+            white-space: nowrap;
+        }
+
+        .pronoun-highlight {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .translation {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        /* Dropdown Styling */
+        select {
+            padding: 6px 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            background-color: #fafafa;
+            cursor: pointer;
+            min-width: 140px;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+            font-family: inherit;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        /* Feedback Classes */
+        select.correct {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        select.incorrect {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .drill-item.item-correct { border-left-color: var(--success-color); }
+        .drill-item.item-incorrect { border-left-color: var(--error-color); }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+        
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (min-width: 600px) {
+            .drill-item {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .translation {
+                margin-top: 0;
+                margin-left: auto;
+                text-align: right;
+                max-width: 40%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Morphologie Drill: Sätze ergänzen</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Vervollständige die russischen Sätze. Wähle die richtige Form für das fettgedruckte Pronomen aus.</p>
+        <p><em>Achte auf den Unterschied: Können (Skill) vs. Können (Situation).</em></p>
+    </div>
+
+    <div class="drill-list" id="drillList">
+        <!-- JS generiert die Zeilen -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Konjugations-Optionen
+    const formsMoch = ["могу", "можешь", "может", "можем", "можете", "могут"];
+    const formsUmet = ["умею", "умеешь", "умеет", "умеем", "умеете", "умеют"];
+
+    /* 
+       Datenstruktur erweitert um Satzteile:
+       part1: Text VOR der Lücke
+       pronoun: Das Pronomen (wird fett markiert)
+       part2: Text NACH der Lücke
+       de: Deutsche Übersetzung
+    */
+    const tasks = [
+        { 
+            id: 1, 
+            part1: "", pronoun: "Я", part2: "помочь тебе завтра.", 
+            verb: "мочь", solution: "могу", 
+            de: "Ich kann dir morgen helfen." 
+        },
+        { 
+            id: 2, 
+            part1: "", pronoun: "Ты", part2: "играть на гитаре?", 
+            verb: "уметь", solution: "умеешь", 
+            de: "Kannst du Gitarre spielen?" 
+        },
+        { 
+            id: 3, 
+            part1: "Сегодня", pronoun: "они", part2: "прийти в гости.", 
+            verb: "мочь", solution: "могут", 
+            de: "Heute können sie zu Besuch kommen." 
+        },
+        { 
+            id: 4, 
+            part1: "", pronoun: "Мы", part2: "хорошо готовить пиццу.", 
+            verb: "уметь", solution: "умеем", 
+            de: "Wir können gut Pizza backen." 
+        },
+        { 
+            id: 5, 
+            part1: "", pronoun: "Он", part2: "открыть окно?", 
+            verb: "мочь", solution: "может", 
+            de: "Kann er das Fenster öffnen?" 
+        },
+        { 
+            id: 6, 
+            part1: "Вы", pronoun: "", part2: "водить машину?", 
+            verb: "уметь", solution: "умеете", 
+            de: "Können Sie Auto fahren?" 
+        },
+        { 
+            id: 7, 
+            part1: "", pronoun: "Ты", part2: "дать мне ручку?", 
+            verb: "мочь", solution: "можешь", 
+            de: "Kannst du mir einen Stift geben?" 
+        },
+        { 
+            id: 8, 
+            part1: "Моя сестра", pronoun: "(она)", part2: "красиво петь.", 
+            verb: "уметь", solution: "умеет", 
+            de: "Meine Schwester kann schön singen." 
+        },
+        { 
+            id: 9, 
+            part1: "Извините, вы", pronoun: "", part2: "повторить вопрос?", 
+            verb: "мочь", solution: "можете", 
+            de: "Entschuldigung, können Sie die Frage wiederholen?" 
+        },
+        { 
+            id: 10, 
+            part1: "", pronoun: "Я", part2: "читать по-русски.", 
+            verb: "уметь", solution: "умею", 
+            de: "Ich kann Russisch lesen." 
+        },
+        { 
+            id: 11, 
+            part1: "Завтра", pronoun: "мы", part2: "поехать в парк.", 
+            verb: "мочь", solution: "можем", 
+            de: "Morgen können wir in den Park fahren." 
+        },
+        { 
+            id: 12, 
+            part1: "Дети", pronoun: "(они)", part2: "быстро бегать.", 
+            verb: "уметь", solution: "умеют", 
+            de: "Die Kinder können schnell rennen." 
+        }
+    ];
+
+    const container = document.getElementById('drillList');
+
+    function init() {
+        container.innerHTML = "";
+        tasks.forEach(task => {
+            // Optionen basierend auf Verbtyp
+            const options = task.verb === "мочь" ? formsMoch : formsUmet;
+            
+            // Dropdown HTML
+            let optionsHTML = `<option value="">...</option>`;
+            options.forEach(opt => {
+                optionsHTML += `<option value="${opt}">${opt}</option>`;
+            });
+
+            const div = document.createElement('div');
+            div.className = 'drill-item';
+            div.id = `item-${task.id}`;
+            
+            // Satz zusammenbauen
+            div.innerHTML = `
+                <div class="sentence-container">
+                    <span class="sentence-part">${task.part1}</span>
+                    <span class="sentence-part pronoun-highlight">${task.pronoun}</span>
+                    <select id="select-${task.id}" data-solution="${task.solution}" onchange="checkSingleInput(this)">
+                        ${optionsHTML}
+                    </select>
+                    <span class="sentence-part">${task.part2}</span>
+                </div>
+                <div class="translation">${task.de}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // Sofortige Überprüfung
+    function checkSingleInput(selectElement) {
+        const parent = selectElement.closest('.drill-item');
+        const userVal = selectElement.value;
+        const solution = selectElement.getAttribute('data-solution');
+
+        // Reset
+        selectElement.classList.remove('correct', 'incorrect');
+        parent.classList.remove('item-correct', 'item-incorrect');
+
+        if (userVal === "") return;
+
+        if (userVal === solution) {
+            selectElement.classList.add('correct');
+            parent.classList.add('item-correct');
+        } else {
+            selectElement.classList.add('incorrect');
+            parent.classList.add('item-incorrect');
+        }
+    }
+
+    function resetAll() {
+        tasks.forEach(task => {
+            const select = document.getElementById(`select-${task.id}`);
+            const itemDiv = document.getElementById(`item-${task.id}`);
+            
+            select.value = "";
+            select.classList.remove('correct', 'incorrect');
+            itemDiv.classList.remove('item-correct', 'item-incorrect');
+        });
+    }
+
+    function solveAll() {
+        tasks.forEach(task => {
+            const select = document.getElementById(`select-${task.id}`);
+            const itemDiv = document.getElementById(`item-${task.id}`);
+            
+            select.value = task.solution;
+            
+            // Manuelle Validierung
+            select.classList.remove('incorrect');
+            select.classList.add('correct');
+            itemDiv.classList.remove('item-incorrect');
+            itemDiv.classList.add('item-correct');
+        });
+    }
+
+    // Starten
+    init();
+
+</script>
+
+</body>
+</html>

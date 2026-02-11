@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Fehlersuche (мочь vs. уметь)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --highlight-color: #ffecb3; /* Helles Orange für Fehlerverdacht */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        /* Liste der Aufgaben */
+        .error-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .error-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            border: 2px solid transparent; /* Für Feedback-Rahmen */
+            transition: transform 0.2s;
+        }
+
+        .error-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .context-row {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .context-row::before { content: ℹ️"; }
+
+        /* Der Satz */
+        .sentence-display {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #2c3e50;
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ddd;
+        }
+
+        /* Das Wort, um das es geht */
+        .focus-word {
+            display: inline-block;
+            padding: 0 6px;
+            border-radius: 4px;
+            background-color: var(--highlight-color);
+            border-bottom: 2px solid #ffca28;
+            transition: all 0.3s;
+        }
+
+        /* Wenn korrigiert */
+        .focus-word.fixed {
+            background-color: #c8e6c9; /* Hellgrün */
+            border-bottom-color: var(--success-color);
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        /* Buttons Area */
+        .decision-area {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .decision-btn {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .decision-btn:hover {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        /* Icons in Buttons */
+        .icon { font-size: 1.2rem; }
+
+        /* Feedback States für Buttons */
+        .decision-btn.btn-correct {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .decision-btn.btn-wrong {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+            opacity: 0.6;
+        }
+
+        /* Deaktivieren nach Antwort */
+        .error-card.solved .decision-btn {
+            pointer-events: none;
+        }
+
+        /* Feedback Nachricht */
+        .feedback-msg {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback-msg.show { display: block; }
+        .feedback-msg.success { color: var(--success-color); }
+        .feedback-msg.error { color: var(--error-color); }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+        
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+        
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .decision-area { flex-direction: column; }
+            .controls { flex-direction: column; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Fehlersuche: мочь vs. уметь</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Lies den russischen Satz. Ist das markierte Verb korrekt?</p>
+        <ul style="margin-top:5px;">
+            <li>Wenn <strong>Ja</strong>: Klicke auf "Der Satz ist korrekt".</li>
+            <li>Wenn <strong>Nein</strong>: Klicke auf den Button "Ändern zu...", um den Fehler zu korrigieren.</li>
+        </ul>
+    </div>
+
+    <div class="error-list" id="taskContainer">
+        <!-- JS generiert Inhalt -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    /*
+        Datenstruktur:
+        sentencePre: Text vor dem Verb
+        verbDisplay: Das Verb, das aktuell im Satz steht (kann falsch sein!)
+        sentencePost: Text nach dem Verb
+        context: Deutscher Kontext
+        isCorrectInText: true = das angezeigte Verb ist richtig, false = es ist ein Fehler
+        alternative: Die Alternative (die richtige Korrektur ODER die falsche Option, falls der Text stimmt)
+        explanation: Erklärung für Feedback
+    */
+    const tasks = [
+        {
+            id: 1,
+            sentencePre: "Я", verbDisplay: "умею", sentencePost: "помочь тебе завтра.",
+            context: "Ich kann dir morgen helfen. (Angebot/Zeit)",
+            isCorrectInText: false,
+            alternative: "могу",
+            explanation: "Es ist eine Situation/Gelegenheit, kein erlernter Skill. Richtig ist <em>могу</em>."
+        },
+        {
+            id: 2,
+            sentencePre: "Ты", verbDisplay: "умеешь", sentencePost: "плавать?",
+            context: "Kannst du schwimmen? (Gelernt?)",
+            isCorrectInText: true,
+            alternative: "можешь",
+            explanation: "Schwimmen ist eine Technik, die man lernt. <em>умеешь</em> ist korrekt."
+        },
+        {
+            id: 3,
+            sentencePre: "Извините, мы не", verbDisplay: "умеем", sentencePost: "открыть дверь.",
+            context: "Entschuldigung, wir können die Tür nicht öffnen. (Sie klemmt)",
+            isCorrectInText: false,
+            alternative: "можем",
+            explanation: "Physische Unmöglichkeit in einer Situation. Richtig ist <em>можем</em>."
+        },
+        {
+            id: 4,
+            sentencePre: "Мой брат", verbDisplay: "умеет", sentencePost: "играть на пианино.",
+            context: "Mein Bruder kann Klavier spielen. (Talent)",
+            isCorrectInText: true,
+            alternative: "может",
+            explanation: "Musikinstrumente spielen ist ein Skill. <em>умеет</em> ist korrekt."
+        },
+        {
+            id: 5,
+            sentencePre: "Собаки не", verbDisplay: "умеют", sentencePost: "говорить.",
+            context: "Hunde können nicht sprechen. (Fehlende Fähigkeit der Spezies)",
+            isCorrectInText: true, // Hier ist umejut richtig (Skill fehlt)
+            alternative: "могут",
+            explanation: "Sprechen ist eine intellektuelle Fähigkeit (Skill). <em>умеют</em> ist korrekt."
+        },
+        {
+            id: 6,
+            sentencePre: "Я", verbDisplay: "могу", sentencePost: "читать по-русски.",
+            context: "Ich kann Russisch lesen. (Ich habe es gelernt)",
+            isCorrectInText: false, // Fehler! Sollte umeju sein (Sprachskill)
+            alternative: "умею",
+            explanation: "Sprachen/Lesen ist ein erlernter Skill. Richtig ist <em>умею</em>."
+        },
+        {
+            id: 7,
+            sentencePre: "Сегодня я не", verbDisplay: "умею", sentencePost: "работать.",
+            context: "Heute kann ich nicht arbeiten. (Krankheit/Keine Zeit)",
+            isCorrectInText: false,
+            alternative: "могу",
+            explanation: "Situation/Umstand (heute). Richtig ist <em>могу</em>."
+        },
+        {
+            id: 8,
+            sentencePre: "Вы", verbDisplay: "можете", sentencePost: "сказать мне время?",
+            context: "Können Sie mir die Uhrzeit sagen? (Bitte)",
+            isCorrectInText: true,
+            alternative: "умеете",
+            explanation: "Eine Bitte in einer konkreten Situation. <em>можете</em> ist korrekt."
+        }
+    ];
+
+    const container = document.getElementById('taskContainer');
+
+    function init() {
+        container.innerHTML = "";
+        tasks.forEach(t => {
+            const card = document.createElement('div');
+            card.className = "error-card";
+            card.id = `task-${t.id}`;
+
+            // Buttons konfigurieren
+            // Wenn der Text falsch ist, ist die "alternative" die Korrektur.
+            // Wenn der Text richtig ist, ist die "alternative" der Fehler.
+            
+            // Button 1: "Ist korrekt"
+            // Button 2: "Ändern zu [Alternative]"
+            
+            card.innerHTML = `
+                <div class="context-row">${t.context}</div>
+                
+                <div class="sentence-display">
+                    ${t.sentencePre} 
+                    <span class="focus-word" id="word-${t.id}">${t.verbDisplay}</span> 
+                    ${t.sentencePost}
+                </div>
+
+                <div class="decision-area">
+                    <button class="decision-btn" onclick="checkAnswer(${t.id}, 'keep', this)">
+                        <span class="icon">✅</span> Der Satz ist korrekt
+                    </button>
+                    <button class="decision-btn" onclick="checkAnswer(${t.id}, 'change', this)">
+                        <span class="icon">🔄</span> Ändern zu "${t.alternative}"
+                    </button>
+                </div>
+
+                <div class="feedback-msg" id="fb-${t.id}"></div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function checkAnswer(id, action, btn) {
+        const task = tasks.find(t => t.id === id);
+        const card = document.getElementById(`task-${id}`);
+        const wordSpan = document.getElementById(`word-${id}`);
+        const feedback = document.getElementById(`fb-${id}`);
+
+        // Verhindern von Mehrfachklicks
+        if (card.classList.contains('solved')) return;
+        card.classList.add('solved');
+
+        let isUserCorrect = false;
+
+        if (action === 'keep') {
+            // User sagt: Satz ist richtig.
+            // Check: War er im Text richtig?
+            if (task.isCorrectInText) {
+                isUserCorrect = true;
+            }
+        } else if (action === 'change') {
+            // User sagt: Ändern.
+            // Check: War er im Text falsch?
+            if (!task.isCorrectInText) {
+                isUserCorrect = true;
+                // ANIMATION: Text ändern!
+                wordSpan.textContent = task.alternative;
+                wordSpan.classList.add('fixed');
+            }
+        }
+
+        if (isUserCorrect) {
+            btn.classList.add('btn-correct');
+            feedback.textContent = "Richtig! " + task.explanation;
+            feedback.className = "feedback-msg show success";
+            card.style.borderColor = "var(--success-color)";
+        } else {
+            btn.classList.add('btn-wrong');
+            
+            // Wenn User "Keep" gewählt hat, aber es falsch war -> Korrigiere es trotzdem visuell
+            if (action === 'keep' && !task.isCorrectInText) {
+                 wordSpan.textContent = task.alternative;
+                 wordSpan.classList.add('fixed');
+                 // Den anderen Button highlighten (hätte man klicken sollen)
+                 const changeBtn = card.querySelectorAll('.decision-btn')[1];
+                 changeBtn.classList.add('btn-correct'); // Zeige was richtig gewesen wäre
+            } 
+            // Wenn User "Change" gewählt hat, aber es richtig war -> Originaltext lassen
+            else if (action === 'change' && task.isCorrectInText) {
+                 const keepBtn = card.querySelectorAll('.decision-btn')[0];
+                 keepBtn.classList.add('btn-correct');
+            }
+
+            feedback.textContent = "Leider falsch. " + task.explanation;
+            feedback.className = "feedback-msg show error";
+            card.style.borderColor = "var(--error-color)";
+        }
+    }
+
+    function resetAll() {
+        init();
+    }
+
+    function solveAll() {
+        tasks.forEach(t => {
+            const card = document.getElementById(`task-${t.id}`);
+            if (card.classList.contains('solved')) return;
+
+            // Simulierte Lösung
+            if (t.isCorrectInText) {
+                // Keep ist richtig
+                const keepBtn = card.querySelectorAll('.decision-btn')[0];
+                checkAnswer(t.id, 'keep', keepBtn);
+            } else {
+                // Change ist richtig
+                const changeBtn = card.querySelectorAll('.decision-btn')[1];
+                checkAnswer(t.id, 'change', changeBtn);
+            }
+        });
+    }
+
+    // Start
+    init();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Skill vs. Situation (10 Aufgaben)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --primary-light: #7986cb;
+            --accent-color: #ff9800;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            background-color: #e8eaf6;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        /* Container für die Karten - Responsive Grid */
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Das Karten-Design */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .sentence {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            min-height: 50px;
+        }
+
+        .context-hint {
+            font-style: italic;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        /* Binary Choice Buttons */
+        .choice-container {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn-choice {
+            flex: 1;
+            padding: 12px 5px;
+            border: 2px solid #e0e0e0;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-choice span.rus {
+            display: block;
+            font-size: 0.85em;
+            color: var(--primary-color);
+            margin-top: 4px;
+        }
+
+        .btn-choice:hover {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        /* States für Feedback */
+        .card.solved .btn-choice {
+            cursor: default;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .card.solved .btn-choice.selected-correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+            opacity: 1;
+        }
+        .card.solved .btn-choice.selected-correct span.rus { color: white; }
+
+        .card.solved .btn-choice.selected-wrong {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+            opacity: 1;
+        }
+        .card.solved .btn-choice.selected-wrong span.rus { color: white; }
+
+        /* Wenn Lösung angezeigt wird */
+        .card.show-solution .btn-choice[data-is-correct="true"] {
+            background-color: #e8f5e9;
+            border-color: var(--success-color);
+            color: var(--success-color);
+            opacity: 1;
+        }
+
+        /* Result Icon overlay */
+        .result-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            display: none;
+        }
+
+        /* Global Controls */
+        .global-controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .main-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s, transform 0.1s;
+            min-width: 150px;
+        }
+
+        .btn-reset { background-color: #607d8b; color: white; }
+        .btn-reset:hover { background-color: #546e7a; }
+
+        .btn-solve-all { background-color: var(--accent-color); color: white; }
+        .btn-solve-all:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .header { padding: 0 10px; }
+            .choice-container { flex-direction: column; }
+            .btn-choice {
+                flex-direction: row;
+                gap: 10px;
+                padding: 15px;
+            }
+            .btn-choice span.rus {
+                margin-top: 0;
+                margin-left: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Entscheidung: Skill oder Situation?</h1>
+        <div class="instruction">
+            <p>Lies die deutschen Sätze und entscheide für jeden Fall: </p>
+            <ul style="margin: 5px 0 0 20px; padding:0;">
+                <li><strong>Skill (уметь):</strong> Eine erlernte Fähigkeit / Wissen "wie es geht".</li>
+                <li><strong>Situation (мочь):</strong> Eine Gelegenheit, körperliche Kraft oder Erlaubnis.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Grid Container für die Aufgaben -->
+    <div class="exercise-grid" id="cardContainer">
+        <!-- Karten werden per JS generiert -->
+    </div>
+
+    <!-- Globale Steuerung -->
+    <div class="global-controls">
+        <button class="main-btn btn-reset" onclick="resetAll()">Alles zurücksetzen</button>
+        <button class="main-btn btn-solve-all" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+
+<script>
+    // Daten für 10 Aufgaben
+    const exercises = [
+        {
+            id: 1,
+            text: "Ich kann heute nicht kommen.",
+            context: "(Ich habe keine Zeit / einen Termin)",
+            type: "situation",
+        },
+        {
+            id: 2,
+            text: "Er kann sehr gut Klavier spielen.",
+            context: "(Er hat es jahrelang geübt)",
+            type: "skill",
+        },
+        {
+            id: 3,
+            text: "Kannst du mir bitte das Salz geben?",
+            context: "(Bist du physisch dazu in der Lage / erreichst du es?)",
+            type: "situation",
+        },
+        {
+            id: 4,
+            text: "Meine Tochter kann schon lesen.",
+            context: "(Sie hat es in der Schule gelernt)",
+            type: "skill",
+        },
+        {
+            id: 5,
+            text: "Ich kann das Fenster nicht öffnen.",
+            context: "(Es klemmt oder ich bin zu schwach)",
+            type: "situation",
+        },
+        {
+            id: 6,
+            text: "Kannst du Schach spielen?",
+            context: "(Kennst du die Regeln?)",
+            type: "skill",
+        },
+        {
+            id: 7,
+            text: "Wir können uns morgen um 10 Uhr treffen.",
+            context: "(Wir haben beide Zeit)",
+            type: "situation",
+        },
+        {
+            id: 8,
+            text: "Der Papagei kann sprechen.",
+            context: "(Er hat Wörter gelernt)",
+            type: "skill",
+        },
+        {
+            id: 9,
+            text: "Ich kann nicht schwimmen.",
+            context: "(Ich habe es nie gelernt)",
+            type: "skill",
+        },
+        {
+            id: 10,
+            text: "Wir können das Auto nicht kaufen.",
+            context: "(Es ist zu teuer / wir haben kein Geld)",
+            type: "situation",
+        }
+    ];
+
+    const container = document.getElementById('cardContainer');
+
+    function init() {
+        container.innerHTML = '';
+        exercises.forEach(ex => {
+            const card = createCard(ex);
+            container.appendChild(card);
+        });
+    }
+
+    function createCard(item) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        cardDiv.id = `card-${item.id}`;
+        cardDiv.setAttribute('data-correct-type', item.type);
+
+        const html = `
+            <div class="result-icon" id="icon-${item.id}"></div>
+            <div class="sentence">${item.text}</div>
+            <div class="context-hint">${item.context}</div>
+            
+            <div class="choice-container">
+                <button class="btn-choice" 
+                        onclick="checkAnswer(${item.id}, 'skill', this)" 
+                        data-type="skill"
+                        data-is-correct="${item.type === 'skill'}">
+                    Skill / Gelernt
+                    <span class="rus">(уметь)</span>
+                </button>
+                
+                <button class="btn-choice" 
+                        onclick="checkAnswer(${item.id}, 'situation', this)" 
+                        data-type="situation"
+                        data-is-correct="${item.type === 'situation'}">
+                    Situation / Umstand
+                    <span class="rus">(мочь)</span>
+                </button>
+            </div>
+        `;
+        
+        cardDiv.innerHTML = html;
+        return cardDiv;
+    }
+
+    function checkAnswer(id, selectedType, btnElement) {
+        const card = document.getElementById(`card-${id}`);
+        if (card.classList.contains('solved')) return;
+
+        const correctType = card.getAttribute('data-correct-type');
+        const icon = document.getElementById(`icon-${id}`);
+
+        card.classList.add('solved');
+        card.classList.remove('show-solution');
+
+        if (selectedType === correctType) {
+            btnElement.classList.add('selected-correct');
+            card.style.borderColor = "var(--success-color)";
+            icon.style.display = "block";
+            icon.innerHTML = "✅";
+            icon.style.color = "var(--success-color)";
+        } else {
+            btnElement.classList.add('selected-wrong');
+            card.style.borderColor = "var(--error-color)";
+            icon.style.display = "block";
+            icon.innerHTML = "❌";
+            icon.style.color = "var(--error-color)";
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.classList.remove('solved', 'show-solution');
+            card.style.borderColor = "transparent";
+            
+            const buttons = card.querySelectorAll('.btn-choice');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected-correct', 'selected-wrong');
+                btn.style.backgroundColor = "";
+                btn.style.borderColor = "";
+                btn.style.color = "";
+                btn.style.opacity = "";
+            });
+
+            const icon = card.querySelector('.result-icon');
+            if(icon) icon.style.display = "none";
+        });
+    }
+
+    function solveAll() {
+        resetAll(); 
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.classList.add('show-solution');
+        });
+    }
+
+    init();
+
+</script>
+
+</body>
+</html>

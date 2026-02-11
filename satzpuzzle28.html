@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Satz-Puzzle (Sofort-Feedback)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        /* Puzzle Container Styles */
+        .puzzle-list {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .puzzle-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        .sentence-meaning {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 15px;
+            font-weight: 500;
+            border-left: 3px solid #ccc;
+            padding-left: 10px;
+        }
+
+        /* Die Linie, wo der Satz gebaut wird */
+        .sentence-target {
+            min-height: 60px;
+            border-bottom: 2px solid #333;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Wenn der ganze Satz fertig und korrekt ist */
+        .sentence-target.fully-correct {
+            border-bottom-color: var(--success-color);
+            background-color: #e8f5e9;
+        }
+
+        /* Wortbank */
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background-color: #eee;
+            border-radius: 8px;
+            min-height: 60px;
+        }
+
+        /* Die Wort-Bausteine */
+        .word-item {
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .word-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .word-item:active {
+            transform: scale(0.95);
+        }
+
+        /* Feedback-Status für einzelne Wörter (nur im Target) */
+        .word-item.pos-correct {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .word-item.pos-wrong {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+
+        button.ctrl-btn:active { transform: scale(0.98); }
+        
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+        
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .word-item { padding: 6px 12px; font-size: 1rem; }
+            .controls { flex-direction: column; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Satz-Puzzle: Syntax üben</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Klicke auf die Wörter, um sie in die richtige Reihenfolge zu bringen.</p>
+        <p><strong>Sofort-Feedback:</strong> <span style="color:var(--success-color); font-weight:bold;">Grün</span> = Das Wort ist an der richtigen Stelle. <span style="color:var(--error-color); font-weight:bold;">Rot</span> = Die Position ist falsch.</p>
+    </div>
+
+    <div class="puzzle-list" id="puzzleList">
+        <!-- JS generiert die Puzzles -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    /*
+        Datenstruktur:
+        meaning: Deutscher Satz (Ziel)
+        words: Array der Wörter in korrekter Reihenfolge
+    */
+    const puzzles = [
+        {
+            id: 1,
+            meaning: "Ich kann gut schwimmen. (Skill)",
+            words: ["Я", "умею", "хорошо", "плавать", "."]
+        },
+        {
+            id: 2,
+            meaning: "Wir können uns morgen nicht treffen. (Situation)",
+            words: ["Мы", "не", "можем", "встретиться", "завтра", "."]
+        },
+        {
+            id: 3,
+            meaning: "Kannst du Gitarre spielen? (Skill)",
+            words: ["Ты", "умеешь", "играть", "на", "гитаре", "?"]
+        },
+        {
+            id: 4,
+            meaning: "Ich kann dieses Fenster nicht öffnen. (Situation)",
+            words: ["Я", "не", "могу", "открыть", "это", "окно", "."]
+        },
+        {
+            id: 5,
+            meaning: "Boris kann sehr schnell lesen. (Skill)",
+            words: ["Борис", "умеет", "читать", "очень", "быстро", "."]
+        },
+        {
+            id: 6,
+            meaning: "Entschuldigen Sie, können Sie mir helfen? (Bitte/Situation)",
+            words: ["Извините", ",", "вы", "можете", "мне", "помочь", "?"]
+        },
+        {
+            id: 7,
+            meaning: "Vögel können fliegen. (Natur/Skill)",
+            words: ["Птицы", "умеют", "летать", "."]
+        },
+        {
+            id: 8,
+            meaning: "Gestern konnte ich nicht anrufen. (Situation/Vergangenheit)",
+            words: ["Вчера", "я", "не", "мог", "позвонить", "."]
+        }
+    ];
+
+    const container = document.getElementById('puzzleList');
+
+    // Hilfsfunktion: Array mischen
+    function shuffleArray(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function init() {
+        container.innerHTML = "";
+        puzzles.forEach(p => {
+            const card = document.createElement('div');
+            card.className = "puzzle-card";
+            card.id = `puzzle-${p.id}`;
+
+            // Wörter mischen
+            const scrambledWords = p.words.map((word, index) => {
+                return { text: word, originalIndex: index };
+            });
+            const shuffled = shuffleArray(scrambledWords);
+
+            // HTML generieren
+            let wordsHTML = "";
+            shuffled.forEach(obj => {
+                wordsHTML += `<div class="word-item" onclick="moveWord(this)" data-original-index="${obj.originalIndex}">${obj.text}</div>`;
+            });
+
+            card.innerHTML = `
+                <div class="sentence-meaning">${p.id}. ${p.meaning}</div>
+                
+                <!-- Zielbereich (Satzzeile) -->
+                <div class="sentence-target" id="target-${p.id}"></div>
+                
+                <!-- Quellbereich (Wortbank) -->
+                <div class="word-bank" id="bank-${p.id}">
+                    ${wordsHTML}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Die "Click-to-Move" Logik mit Sofort-Validierung
+    function moveWord(wordEl) {
+        const card = wordEl.closest('.puzzle-card');
+        const bank = card.querySelector('.word-bank');
+        const target = card.querySelector('.sentence-target');
+        
+        // Parent prüfen
+        if (wordEl.parentElement === bank) {
+            // Bewege zur Target Line
+            target.appendChild(wordEl);
+        } else {
+            // Bewege zurück zur Bank
+            bank.appendChild(wordEl);
+            
+            // Wenn zurückgelegt, Feedback entfernen
+            wordEl.classList.remove('pos-correct', 'pos-wrong');
+        }
+        
+        // Nach jeder Bewegung: Validieren
+        validateSentence(target);
+    }
+
+    // Prüft Position jedes Wortes im Zielbereich
+    function validateSentence(targetElement) {
+        const wordsInTarget = Array.from(targetElement.querySelectorAll('.word-item'));
+        
+        let allCorrect = true;
+        
+        // Wir gehen jedes Wort durch, das gerade im Ziel liegt
+        wordsInTarget.forEach((word, index) => {
+            const correctIndex = parseInt(word.getAttribute('data-original-index'));
+            
+            // Logik: Ist das Wort an Index 0 auch das Wort, das an Index 0 gehört?
+            if (correctIndex === index) {
+                word.classList.remove('pos-wrong');
+                word.classList.add('pos-correct');
+            } else {
+                word.classList.remove('pos-correct');
+                word.classList.add('pos-wrong');
+                allCorrect = false;
+            }
+        });
+
+        // Prüfen, ob der Satz vollständig ist (wir brauchen die Gesamtzahl der Wörter)
+        // Dazu schauen wir auf die ID
+        const puzzleId = parseInt(targetElement.id.split('-')[1]);
+        const puzzleData = puzzles.find(p => p.id === puzzleId);
+        
+        if (wordsInTarget.length === puzzleData.words.length && allCorrect) {
+            targetElement.classList.add('fully-correct');
+        } else {
+            targetElement.classList.remove('fully-correct');
+        }
+    }
+
+    function resetAll() {
+        init();
+    }
+
+    function solveAll() {
+        puzzles.forEach(p => {
+            const card = document.getElementById(`puzzle-${p.id}`);
+            const bank = card.querySelector('.word-bank');
+            const target = card.querySelector('.sentence-target');
+            
+            // Alle Wörter holen
+            const allWords = Array.from(card.querySelectorAll('.word-item'));
+            
+            // Sortieren nach Original Index
+            allWords.sort((a, b) => {
+                return parseInt(a.getAttribute('data-original-index')) - parseInt(b.getAttribute('data-original-index'));
+            });
+
+            // Alle in die Target-Zone schieben
+            allWords.forEach(w => target.appendChild(w));
+            
+            // Validierung anstoßen, damit sie grün werden
+            validateSentence(target);
+        });
+    }
+
+    // Starten
+    init();
+
+</script>
+
+</body>
+</html>

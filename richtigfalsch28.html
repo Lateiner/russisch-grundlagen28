@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Logik-Check (Richtig oder Falsch)</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-bg: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --btn-hover: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction-box {
+            background-color: var(--secondary-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .rus-sentence {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            min-height: 60px; /* Einheitliche Höhe */
+            display: flex;
+            align-items: center;
+        }
+
+        .translation {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        /* Buttons Area */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        /* Button Basis-Style */
+        .logic-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logic-btn:hover {
+            background-color: var(--btn-hover);
+            border-color: #bbb;
+        }
+
+        /* Spezifische Button Styles */
+        .btn-true { color: #2e7d32; }
+        .btn-false { color: #c62828; }
+
+        /* Status: Gelöst */
+        .card.solved .btn-group {
+            pointer-events: none; /* Keine Klicks mehr */
+        }
+
+        /* Feedback Farben */
+        .logic-btn.selected-correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .logic-btn.selected-wrong {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+
+        .logic-btn.reveal-correct {
+            border-color: var(--success-color);
+            color: var(--success-color);
+            background-color: #e8f5e9;
+        }
+
+        /* Rahmen der Karte */
+        .card.border-correct { border-color: var(--success-color); background-color: #f1f8e9; }
+        .card.border-wrong { border-color: var(--error-color); background-color: #ffebee; }
+
+        /* Erklärungstext bei falscher Antwort */
+        .feedback-text {
+            font-size: 0.85rem;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 4px;
+            display: none;
+            color: #333;
+        }
+        .card.solved .feedback-text { display: block; }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            min-width: 160px;
+        }
+        button.ctrl-btn:active { transform: scale(0.98); }
+        
+        .btn-reset { background-color: #78909c; }
+        .btn-reset:hover { background-color: #607d8b; }
+        .btn-solve { background-color: #ff9800; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        @media (max-width: 600px) {
+            .btn-group { flex-direction: column; }
+            .controls { flex-direction: column; }
+            button.ctrl-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Logik-Check: Richtig oder Falsch?</h1>
+    </header>
+
+    <div class="instruction-box">
+        <p><strong>Anleitung:</strong> Ist der russische Satz logisch und grammatikalisch korrekt? Achte besonders auf den Unterschied zwischen <em>уметь</em> (Skill/Wissen) und <em>мочь</em> (Situation/Möglichkeit).</p>
+        <p><em>Beispiel: „Ein Hund kann sprechen“ ist falsch (Hunde haben diesen Skill nicht).</em></p>
+    </div>
+
+    <div class="grid-container" id="gridArea">
+        <!-- JS generiert Inhalt -->
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solve" onclick="solveAll()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    /* 
+       Daten für die Aufgaben.
+       isCorrect: true = Satz ist logisch/richtig.
+       isCorrect: false = Satz ist unlogisch oder grammatikalisch falsch (falsches Verb).
+    */
+    const sentences = [
+        {
+            id: 1,
+            rus: "Собака умеет говорить.",
+            de: "Der Hund kann sprechen.",
+            isCorrect: false,
+            explanation: "Hunde haben die Fähigkeit zu sprechen nicht."
+        },
+        {
+            id: 2,
+            rus: "Повар умеет готовить суп.",
+            de: "Der Koch kann Suppe kochen.",
+            isCorrect: true,
+            explanation: "Das ist ein erlernter Skill (уметь)."
+        },
+        {
+            id: 3,
+            rus: "Ты умеешь передать мне соль?",
+            de: "Kannst du mir das Salz reichen?",
+            isCorrect: false,
+            explanation: "Das ist eine Bitte/Situation, kein Skill. Richtig: <em>Ты можешь...?</em>"
+        },
+        {
+            id: 4,
+            rus: "Рыба не умеет плавать.",
+            de: "Der Fisch kann nicht schwimmen.",
+            isCorrect: false,
+            explanation: "Falsch, Fische können das von Natur aus."
+        },
+        {
+            id: 5,
+            rus: "Я сегодня не умею пойти в кино.",
+            de: "Ich kann heute nicht ins Kino gehen.",
+            isCorrect: false,
+            explanation: "Das ist eine Situation (keine Zeit), kein fehlendes Talent. Richtig: <em>не могу</em>."
+        },
+        {
+            id: 6,
+            rus: "Художник умеет рисовать.",
+            de: "Der Maler kann malen.",
+            isCorrect: true,
+            explanation: "Das ist sein Beruf/Skill."
+        },
+        {
+            id: 7,
+            rus: "Я не могу открыть дверь, нет ключа.",
+            de: "Ich kann die Tür nicht öffnen, kein Schlüssel.",
+            isCorrect: true,
+            explanation: "Korrekte Nutzung von <em>мочь</em> für eine Situation."
+        },
+        {
+            id: 8,
+            rus: "Младенец умеет водить машину.",
+            de: "Das Baby kann Auto fahren.",
+            isCorrect: false,
+            explanation: "Ein Baby hat diesen Skill noch nicht gelernt."
+        },
+        {
+            id: 9,
+            rus: "Извини, я не умею помочь тебе сейчас.",
+            de: "Entschuldige, ich kann dir jetzt nicht helfen.",
+            isCorrect: false,
+            explanation: "Es geht um den Zeitpunkt (Situation). Richtig: <em>не могу</em>."
+        },
+        {
+            id: 10,
+            rus: "Птицы умеют летать.",
+            de: "Vögel können fliegen.",
+            isCorrect: true,
+            explanation: "Das ist eine natürliche Fähigkeit der Vögel."
+        }
+    ];
+
+    const grid = document.getElementById('gridArea');
+
+    function init() {
+        grid.innerHTML = "";
+        sentences.forEach(item => {
+            const card = document.createElement('div');
+            card.className = "card";
+            card.id = `card-${item.id}`;
+            card.setAttribute('data-is-correct', item.isCorrect);
+
+            card.innerHTML = `
+                <div class="rus-sentence">${item.rus}</div>
+                <div class="translation">${item.de}</div>
+                
+                <div class="btn-group">
+                    <button class="logic-btn btn-true" onclick="checkAnswer(${item.id}, true, this)">
+                        <span>👍</span> Richtig
+                    </button>
+                    <button class="logic-btn btn-false" onclick="checkAnswer(${item.id}, false, this)">
+                        <span>👎</span> Falsch
+                    </button>
+                </div>
+                <div class="feedback-text" id="feedback-${item.id}">
+                    ${item.explanation}
+                </div>
+            `;
+            
+            // Feedback Text initial verstecken (via CSS .card.solved gesteuert)
+            grid.appendChild(card);
+        });
+    }
+
+    function checkAnswer(id, userVote, btn) {
+        const card = document.getElementById(`card-${id}`);
+        // Verhindert Mehrfachklicks
+        if (card.classList.contains('solved')) return;
+
+        const isActuallyCorrect = (card.getAttribute('data-is-correct') === 'true');
+        card.classList.add('solved');
+
+        // userVote is true (User says "Richtig") vs isActuallyCorrect
+        const userWasRight = (userVote === isActuallyCorrect);
+
+        if (userWasRight) {
+            // User hat richtig getippt
+            btn.classList.add('selected-correct');
+            card.classList.add('border-correct');
+        } else {
+            // User hat falsch getippt
+            btn.classList.add('selected-wrong');
+            card.classList.add('border-wrong');
+            
+            // Zeige den anderen Button als die korrekte Lösung an
+            const otherBtnClass = userVote ? '.btn-false' : '.btn-true';
+            card.querySelector(otherBtnClass).classList.add('reveal-correct');
+        }
+    }
+
+    function resetAll() {
+        init();
+    }
+
+    function solveAll() {
+        sentences.forEach(item => {
+            const card = document.getElementById(`card-${item.id}`);
+            if(card.classList.contains('solved')) return;
+
+            card.classList.add('solved', 'border-correct');
+            
+            // Den richtigen Button markieren
+            if (item.isCorrect) {
+                card.querySelector('.btn-true').classList.add('selected-correct');
+            } else {
+                card.querySelector('.btn-false').classList.add('selected-correct');
+            }
+        });
+    }
+
+    // Start
+    init();
+
+</script>
+
+</body>
+</html>

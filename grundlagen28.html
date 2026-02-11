@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: мочь vs. уметь</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #e8eaf6;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --highlight-color: #ffeb3b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 { color: var(--primary-color); text-align: center; }
+        h2 { border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-top: 40px; }
+        h3 { color: #555; margin-top: 0; }
+
+        .intro-box {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        .exercise-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .input-group { margin-bottom: 15px; }
+
+        /* Dropdown Styling */
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        select.correct { border-color: var(--success-color); background-color: #e8f5e9; }
+        select.incorrect { border-color: var(--error-color); background-color: #ffebee; }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #303f9f; }
+        .btn-reset { background-color: #757575; color: white; }
+        .btn-reset:hover { background-color: #616161; }
+        .btn-solve { background-color: #ff9800; color: white; }
+        .btn-solve:hover { background-color: #f57c00; }
+
+        /* Klick-Logik Styles (Aufgabe 4 & 6) */
+        .click-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            min-height: 50px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .clickable-item {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-block;
+            user-select: none;
+            border: 2px solid transparent;
+            transition: transform 0.1s;
+        }
+
+        .clickable-item:active { transform: scale(0.95); }
+        
+        /* Hervorhebung bei Auswahl (für Aufgabe 4) */
+        .clickable-item.selected {
+            background-color: var(--highlight-color);
+            color: black;
+            border-color: #fbc02d;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .target-box {
+            flex: 1;
+            min-width: 250px;
+            min-height: 100px;
+            border: 2px dashed #aaa;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fdfdfd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .target-box:hover { background-color: #f1f8e9; }
+        .target-box h4 { margin-top: 0; text-align: center; pointer-events: none; color: #777; }
+
+        .target-box.correct { border-color: var(--success-color); background-color: #e8f5e9; }
+        .target-box.incorrect { border-color: var(--error-color); background-color: #ffebee; }
+
+        .sentence-line {
+            min-height: 60px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding: 5px;
+            background: white;
+        }
+        
+        .sentence-line.correct { border-bottom-color: var(--success-color); }
+        .sentence-line.incorrect { border-bottom-color: var(--error-color); }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            select { width: 100%; }
+            .controls { flex-direction: column; }
+            button { width: 100%; }
+            .target-box { width: 100%; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Grammatikübung: мочь vs. уметь</h1>
+
+    <div class="intro-box">
+        <h3>Einführung: Der Unterschied</h3>
+        <p><strong>УМЕТЬ (Skill / Gelerntes):</strong> Man weiß, <em>wie</em> etwas geht, weil man es gelernt hat.<br>
+        <em>Beispiel:</em> Я умею плавать. (Ich kann schwimmen.)</p>
+        <p><strong>МОЧЬ (Möglichkeit):</strong> Man hat die physische Kraft, Zeit oder Erlaubnis dazu.<br>
+        <em>Beispiel:</em> Я могу помочь. (Ich kann helfen.)</p>
+    </div>
+
+    <!-- Aufgabe 1: Multiple Choice -->
+    <div class="exercise-card" id="ex1">
+        <h3>Aufgabe 1: Welches Verb passt? (Grundverständnis)</h3>
+        <p>Wähle aus, ob hier eine erlernte Fähigkeit (Skill) oder eine Möglichkeit (Situation) gemeint ist.</p>
+        
+        <div class="input-group">
+            1. Ich kann Gitarre spielen. &rarr; 
+            <select data-solution="Skill">
+                <option value="">- Bitte wählen -</option>
+                <option value="Skill">Skill (уметь)</option>
+                <option value="Situation">Situation (мочь)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            2. Kannst du das Fenster öffnen? &rarr; 
+            <select data-solution="Situation">
+                <option value="">- Bitte wählen -</option>
+                <option value="Skill">Skill (уметь)</option>
+                <option value="Situation">Situation (мочь)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            3. Das Baby kann noch nicht laufen. &rarr; 
+            <select data-solution="Skill">
+                <option value="">- Bitte wählen -</option>
+                <option value="Skill">Skill (уметь)</option>
+                <option value="Situation">Situation (мочь)</option>
+            </select>
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex1')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex1')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex1')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 2: Dropdown МОЧЬ -->
+    <div class="exercise-card" id="ex2">
+        <h3>Aufgabe 2: Konjugation von „мочь“ (Präsens)</h3>
+        <p>Wähle die richtige Form aus.</p>
+        
+        <div class="input-group">1. Я <select data-solution="могу">
+            <option value="">---</option>
+            <option value="могу">могу</option>
+            <option value="можешь">можешь</option>
+            <option value="может">может</option>
+            <option value="можем">можем</option>
+            <option value="можете">можете</option>
+            <option value="могут">могут</option>
+        </select> это сделать.</div>
+
+        <div class="input-group">2. Ты <select data-solution="можешь">
+            <option value="">---</option>
+            <option value="могу">могу</option>
+            <option value="можешь">можешь</option>
+            <option value="может">может</option>
+            <option value="можем">можем</option>
+            <option value="можете">можете</option>
+            <option value="могут">могут</option>
+        </select> прийти завтра?</div>
+
+        <div class="input-group">3. Они не <select data-solution="могут">
+            <option value="">---</option>
+            <option value="могу">могу</option>
+            <option value="можешь">можешь</option>
+            <option value="может">может</option>
+            <option value="можем">можем</option>
+            <option value="можете">можете</option>
+            <option value="могут">могут</option>
+        </select> найти дорогу.</div>
+
+        <div class="input-group">4. Вы <select data-solution="можете">
+            <option value="">---</option>
+            <option value="могу">могу</option>
+            <option value="можешь">можешь</option>
+            <option value="может">может</option>
+            <option value="можем">можем</option>
+            <option value="можете">можете</option>
+            <option value="могут">могут</option>
+        </select> говорить громче?</div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex2')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex2')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex2')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 3: Dropdown УМЕТЬ -->
+    <div class="exercise-card" id="ex3">
+        <h3>Aufgabe 3: Konjugation von „уметь“ (Präsens)</h3>
+        <p>Wähle die richtige Form aus.</p>
+        
+        <div class="input-group">1. Мой брат хорошо <select data-solution="умеет">
+            <option value="">---</option>
+            <option value="умею">умею</option>
+            <option value="умеешь">умеешь</option>
+            <option value="умеет">умеет</option>
+            <option value="умеем">умеем</option>
+            <option value="умеете">умеете</option>
+            <option value="умеют">умеют</option>
+        </select> рисовать.</div>
+
+        <div class="input-group">2. Вы <select data-solution="умеете">
+            <option value="">---</option>
+            <option value="умею">умею</option>
+            <option value="умеешь">умеешь</option>
+            <option value="умеет">умеет</option>
+            <option value="умеем">умеем</option>
+            <option value="умеете">умеете</option>
+            <option value="умеют">умеют</option>
+        </select> водить машину?</div>
+
+        <div class="input-group">3. Мы не <select data-solution="умеем">
+            <option value="">---</option>
+            <option value="умею">умею</option>
+            <option value="умеешь">умеешь</option>
+            <option value="умеет">умеет</option>
+            <option value="умеем">умеем</option>
+            <option value="умеете">умеете</option>
+            <option value="умеют">умеют</option>
+        </select> кататься на лыжах.</div>
+
+        <div class="input-group">4. Я <select data-solution="умею">
+            <option value="">---</option>
+            <option value="умею">умею</option>
+            <option value="умеешь">умеешь</option>
+            <option value="умеет">умеет</option>
+            <option value="умеем">умеем</option>
+            <option value="умеете">умеете</option>
+            <option value="умеют">умеют</option>
+        </select> готовить борщ.</div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex3')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex3')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex3')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 4: Click to Move (Kategorisierung) -->
+    <div class="exercise-card" id="ex4">
+        <h3>Aufgabe 4: Ordne zu</h3>
+        <p><strong>Anleitung:</strong> Klicke zuerst auf ein Wort (es wird gelb) und dann auf den Kasten, in den es gehört.</p>
+        
+        <!-- Wort-Pool -->
+        <div class="click-container" id="source-ex4">
+            <div class="clickable-item" onclick="selectItem(this)" data-category="skill">lesen und schreiben</div>
+            <div class="clickable-item" onclick="selectItem(this)" data-category="situation">heute ins Kino gehen</div>
+            <div class="clickable-item" onclick="selectItem(this)" data-category="skill">Schach spielen</div>
+            <div class="clickable-item" onclick="selectItem(this)" data-category="situation">mir den Salzstreuer geben</div>
+        </div>
+
+        <!-- Ziel-Kästen -->
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <div class="target-box" id="target-skill" onclick="moveItemToBox(this, 'skill')">
+                <h4>УМЕТЬ (Fähigkeit)</h4>
+            </div>
+            <div class="target-box" id="target-situation" onclick="moveItemToBox(this, 'situation')">
+                <h4>МОЧЬ (Möglichkeit)</h4>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkClickSort('ex4')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetClickSort('ex4')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveClickSort('ex4')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 5: Auswahl -->
+    <div class="exercise-card" id="ex5">
+        <h3>Aufgabe 5: Wähle das richtige Verb im Kontext</h3>
+        
+        <div class="input-group">
+            1. Извини, я не <select data-solution="могу">
+                <option value="">...</option>
+                <option value="могу">могу</option>
+                <option value="умею">умею</option>
+            </select> открыть эту дверь. Она закрыта.
+        </div>
+        <div class="input-group">
+            2. Анна <select data-solution="умеет">
+                <option value="">...</option>
+                <option value="может">может</option>
+                <option value="умеет">умеет</option>
+            </select> говорить по-французски очень хорошо.
+        </div>
+        <div class="input-group">
+            3. Ты <select data-solution="можешь">
+                <option value="">...</option>
+                <option value="можешь">можешь</option>
+                <option value="умеешь">умеешь</option>
+            </select> позвонить мне вечером?
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex5')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex5')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex5')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 6: Click to Move (Satzbau) -->
+    <div class="exercise-card" id="ex6">
+        <h3>Aufgabe 6: Bringe die Wörter in die richtige Reihenfolge</h3>
+        <p><strong>Anleitung:</strong> Klicke auf ein Wort im grauen Kasten, um es in den Satz einzufügen. Klicke es im Satz an, um es zurückzulegen.</p>
+        
+        <div style="margin-bottom: 10px;"><em>nicht / schwimmen / Ich / kann. (Fähigkeit)</em></div>
+        
+        <!-- Satz-Zeile -->
+        <div class="sentence-line" id="sentence-zone-6">
+            <!-- Wörter kommen hierher -->
+        </div>
+        
+        <!-- Wort-Pool -->
+        <div class="click-container" id="source-ex6" style="margin-top:20px;">
+            <div class="clickable-item" onclick="toggleWordLocation(this, 'source-ex6', 'sentence-zone-6')" data-order="3">плавать</div>
+            <div class="clickable-item" onclick="toggleWordLocation(this, 'source-ex6', 'sentence-zone-6')" data-order="1">Я</div>
+            <div class="clickable-item" onclick="toggleWordLocation(this, 'source-ex6', 'sentence-zone-6')" data-order="4">.</div>
+            <div class="clickable-item" onclick="toggleWordLocation(this, 'source-ex6', 'sentence-zone-6')" data-order="2">не умею</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkOrder('ex6')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetOrder('ex6', 'source-ex6', 'sentence-zone-6')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveOrder('ex6', 'sentence-zone-6')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 7: Dropdown Gemischt -->
+    <div class="exercise-card" id="ex7">
+        <h3>Aufgabe 7: Gemischte Lückentext-Übung</h3>
+        <p>Wähle <em>мочь</em> oder <em>уметь</em> in der richtigen Form.</p>
+        
+        <div class="input-group">
+            1. Птицы <select data-solution="умеют">
+                <option value="">---</option>
+                <option value="умеют">умеют</option>
+                <option value="могут">могут</option>
+            </select> летать. (Fähigkeit der Spezies)
+        </div>
+        <div class="input-group">
+            2. Я заболел и не <select data-solution="могу">
+                <option value="">---</option>
+                <option value="умею">умею</option>
+                <option value="могу">могу</option>
+            </select> пойти на работу. (Situation)
+        </div>
+        <div class="input-group">
+            3. Твой сын уже <select data-solution="умеет">
+                <option value="">---</option>
+                <option value="умеет">умеет</option>
+                <option value="может">может</option>
+            </select> читать? (Erlerntes)
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex7')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex7')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex7')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 8: Richtig oder Falsch -->
+    <div class="exercise-card" id="ex8">
+        <h3>Aufgabe 8: Logik-Check</h3>
+        <p>Entscheide, ob der russische Satz zur deutschen Bedeutung passt.</p>
+        
+        <div class="input-group">
+            1. „Ich kann das Auto reparieren (ich habe das Werkzeug da).“ &rarr; <em>Я умею ремонтировать машину.</em>
+            <select data-solution="Falsch">
+                <option value="">Wählen</option>
+                <option value="Richtig">Richtig</option>
+                <option value="Falsch">Falsch (besser: могу)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            2. „Kannst du tanzen?“ &rarr; <em>Ты умеешь танцевать?</em>
+            <select data-solution="Richtig">
+                <option value="">Wählen</option>
+                <option value="Richtig">Richtig</option>
+                <option value="Falsch">Falsch</option>
+            </select>
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex8')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex8')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex8')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 9: Dropdown Vergangenheit -->
+    <div class="exercise-card" id="ex9">
+        <h3>Aufgabe 9: Verben in der Vergangenheit</h3>
+        <p>Wähle die richtige Vergangenheitsform (m/f/pl).</p>
+        
+        <div class="input-group">
+            1. (Er - Möglichkeit) Вчера он не <select data-solution="мог">
+                <option value="">---</option>
+                <option value="мог">мог</option>
+                <option value="могла">могла</option>
+                <option value="могли">могли</option>
+                <option value="умел">умел</option>
+            </select> позвонить.
+        </div>
+        <div class="input-group">
+            2. (Sie - Skill) Раньше она не <select data-solution="умела">
+                <option value="">---</option>
+                <option value="умела">умела</option>
+                <option value="умел">умел</option>
+                <option value="могла">могла</option>
+            </select> плавать.
+        </div>
+        <div class="input-group">
+            3. (Wir - Möglichkeit) Мы <select data-solution="могли">
+                <option value="">---</option>
+                <option value="могли">могли</option>
+                <option value="умели">умели</option>
+                <option value="мог">мог</option>
+            </select> видеть море из окна.
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex9')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex9')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex9')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 10: Dropdown Zukunft -->
+    <div class="exercise-card" id="ex10">
+        <h3>Aufgabe 10: Zukunft (смочь)</h3>
+        <p>Wähle die passende Zukunftsform.</p>
+        
+        <div class="input-group">
+            1. Я думаю, я <select data-solution="смогу">
+                <option value="">---</option>
+                <option value="могу">могу</option>
+                <option value="смогу">смогу (werde können)</option>
+                <option value="умею">умею</option>
+            </select> сделать это завтра.
+        </div>
+        <div class="input-group">
+            2. Ты <select data-solution="сможешь">
+                <option value="">---</option>
+                <option value="можешь">можешь</option>
+                <option value="сможешь">сможешь (wirst können)</option>
+                <option value="умеешь">умеешь</option>
+            </select> помочь мне вечером?
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex10')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex10')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex10')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 11: Dropdown Übersetzung -->
+    <div class="exercise-card" id="ex11">
+        <h3>Aufgabe 11: Übersetzung</h3>
+        <p>Wähle das passende russische Verb für das deutsche „können“.</p>
+        
+        <div class="input-group">
+            1. Ich <strong>kann</strong> nicht schlafen. (Zustand) &rarr; <select data-solution="могу">
+                <option value="">---</option>
+                <option value="могу">могу</option>
+                <option value="умею">умею</option>
+            </select>
+        </div>
+        <div class="input-group">
+            2. Er <strong>kann</strong> gut singen. (Talent) &rarr; <select data-solution="умеет">
+                <option value="">---</option>
+                <option value="может">может</option>
+                <option value="умеет">умеет</option>
+            </select>
+        </div>
+        <div class="input-group">
+            3. Wir <strong>können</strong> uns morgen treffen. (Plan) &rarr; <select data-solution="можем">
+                <option value="">---</option>
+                <option value="можем">можем</option>
+                <option value="умеем">умеем</option>
+            </select>
+        </div>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex11')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex11')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex11')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Aufgabe 12: Dropdown Textverständnis -->
+    <div class="exercise-card" id="ex12">
+        <h3>Aufgabe 12: Dialog ergänzen</h3>
+        <p>Wähle die fehlenden Wörter aus.</p>
+        
+        <p style="line-height: 2.5;">
+            — Привет! Ты <select data-solution="умеешь">
+                <option value="">(Wählen)</option>
+                <option value="можешь">можешь</option>
+                <option value="умеешь">умеешь</option>
+            </select> играть в теннис?<br>
+            — Привет! Да, я немного играю. А ты?<br>
+            — Я не <select data-solution="умею">
+                <option value="">(Wählen)</option>
+                <option value="могу">могу</option>
+                <option value="умею">умею</option>
+            </select>, но хочу научиться.<br>
+            — Отлично! Мы <select data-solution="можем">
+                <option value="">(Wählen)</option>
+                <option value="можем">можем</option>
+                <option value="умеем">умеем</option>
+            </select> пойти на корт в субботу.<br>
+            — Извини, в субботу я не <select data-solution="могу">
+                <option value="">(Wählen)</option>
+                <option value="могу">могу</option>
+                <option value="умею">умею</option>
+            </select>. Я работаю.
+        </p>
+
+        <div class="controls">
+            <button class="btn-check" onclick="checkSelects('ex12')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelects('ex12')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveSelects('ex12')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* --- Globale Variable für die Auswahl (Aufgabe 4) --- */
+    let selectedElement = null;
+
+    /* --- Dropdown Check Funktionen (Für Aufg 1, 2, 3, 5, 7, 8, 9, 10, 11, 12) --- */
+    function checkSelects(containerId) {
+        const container = document.getElementById(containerId);
+        const selects = container.querySelectorAll('select');
+        
+        selects.forEach(select => {
+            const userAnswer = select.value;
+            const solution = select.getAttribute('data-solution');
+            
+            select.classList.remove('correct', 'incorrect');
+            
+            if (userAnswer === "") {
+                return; // Nichts ausgewählt
+            }
+
+            if (userAnswer === solution) {
+                select.classList.add('correct');
+            } else {
+                select.classList.add('incorrect');
+            }
+        });
+    }
+
+    function resetSelects(containerId) {
+        const container = document.getElementById(containerId);
+        const selects = container.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = "";
+            select.classList.remove('correct', 'incorrect');
+        });
+    }
+
+    function solveSelects(containerId) {
+        const container = document.getElementById(containerId);
+        const selects = container.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = select.getAttribute('data-solution');
+            select.classList.remove('incorrect');
+            select.classList.add('correct');
+        });
+    }
+
+    /* --- Logik für Aufgabe 4: Click-to-Move (Zuordnen) --- */
+    
+    function selectItem(el) {
+        // Wenn schon ausgewählt, Auswahl aufheben
+        if (selectedElement === el) {
+            el.classList.remove('selected');
+            selectedElement = null;
+            return;
+        }
+
+        // Altes abwählen
+        if (selectedElement) {
+            selectedElement.classList.remove('selected');
+        }
+
+        // Neues auswählen
+        selectedElement = el;
+        el.classList.add('selected');
+    }
+
+    function moveItemToBox(boxElement, targetType) {
+        // Nichts ausgewählt? Abbrechen.
+        if (!selectedElement) return;
+
+        // Prüfen ob das Element überhaupt zur Aufgabe 4 gehört
+        if (!document.getElementById('source-ex4').contains(selectedElement) && 
+            !selectedElement.parentElement.classList.contains('target-box')) {
+            return; 
+        }
+        
+        // Element verschieben
+        boxElement.appendChild(selectedElement);
+        
+        // Auswahl zurücksetzen
+        selectedElement.classList.remove('selected');
+        selectedElement = null;
+        
+        // Klassen entfernen (falls vorher gelöst)
+        const allZones = document.querySelectorAll('#ex4 .target-box');
+        allZones.forEach(z => z.classList.remove('correct', 'incorrect'));
+    }
+
+    function checkClickSort(containerId) {
+        const container = document.getElementById(containerId);
+        const targets = container.querySelectorAll('.target-box');
+
+        targets.forEach(box => {
+            const expected = box.id === 'target-skill' ? 'skill' : 'situation';
+            const items = box.querySelectorAll('.clickable-item');
+            
+            if (items.length === 0) {
+                box.classList.remove('correct', 'incorrect');
+                return;
+            }
+
+            let allCorrect = true;
+            items.forEach(item => {
+                if (item.getAttribute('data-category') !== expected) {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                box.classList.add('correct');
+                box.classList.remove('incorrect');
+            } else {
+                box.classList.add('incorrect');
+                box.classList.remove('correct');
+            }
+        });
+    }
+
+    function resetClickSort(containerId) {
+        const container = document.getElementById(containerId);
+        const source = container.querySelector('.click-container');
+        const items = container.querySelectorAll('.clickable-item');
+        
+        items.forEach(item => {
+            item.classList.remove('selected');
+            source.appendChild(item);
+        });
+
+        const targets = container.querySelectorAll('.target-box');
+        targets.forEach(t => t.classList.remove('correct', 'incorrect'));
+        selectedElement = null;
+    }
+
+    function solveClickSort(containerId) {
+        const container = document.getElementById(containerId);
+        const items = container.querySelectorAll('.clickable-item');
+        const targetSkill = document.getElementById('target-skill');
+        const targetSituation = document.getElementById('target-situation');
+
+        items.forEach(item => {
+            item.classList.remove('selected');
+            if (item.getAttribute('data-category') === 'skill') {
+                targetSkill.appendChild(item);
+            } else {
+                targetSituation.appendChild(item);
+            }
+        });
+
+        targetSkill.classList.add('correct');
+        targetSkill.classList.remove('incorrect');
+        targetSituation.classList.add('correct');
+        targetSituation.classList.remove('incorrect');
+        selectedElement = null;
+    }
+
+    /* --- Logik für Aufgabe 6: Click-to-Move (Wortbank) --- */
+
+    function toggleWordLocation(wordEl, sourceId, targetId) {
+        const source = document.getElementById(sourceId);
+        const target = document.getElementById(targetId);
+        const parent = wordEl.parentElement;
+
+        // Wenn im Source -> ab ins Target
+        if (parent.id === sourceId) {
+            target.appendChild(wordEl);
+        } else {
+            // Wenn im Target -> zurück ins Source
+            source.appendChild(wordEl);
+        }
+        
+        // Status zurücksetzen
+        target.classList.remove('correct', 'incorrect');
+    }
+
+    function checkOrder(containerId) {
+        const container = document.getElementById(containerId);
+        const sentenceZone = container.querySelector('.sentence-line');
+        const items = sentenceZone.querySelectorAll('.clickable-item');
+        
+        sentenceZone.classList.remove('correct', 'incorrect');
+
+        if (items.length === 0) return;
+
+        // Reihenfolge prüfen
+        let currentOrder = [];
+        items.forEach(item => currentOrder.push(parseInt(item.getAttribute('data-order'))));
+
+        let isCorrect = true;
+        if (currentOrder.length !== 4) { // Es müssen 4 Wörter sein
+            isCorrect = false;
+        } else {
+            for (let i = 0; i < currentOrder.length; i++) {
+                if (currentOrder[i] !== (i + 1)) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+        }
+
+        if (isCorrect) sentenceZone.classList.add('correct');
+        else sentenceZone.classList.add('incorrect');
+    }
+
+    function resetOrder(containerId, sourceId, sentenceId) {
+        const source = document.getElementById(sourceId);
+        const sentenceZone = document.getElementById(sentenceId);
+        const items = document.querySelectorAll('#' + containerId + ' .clickable-item');
+        
+        // Alles zurück in den Source Container
+        items.forEach(item => source.appendChild(item));
+        sentenceZone.classList.remove('correct', 'incorrect');
+    }
+
+    function solveOrder(containerId, sentenceId) {
+        const container = document.getElementById(containerId);
+        const sentenceZone = document.getElementById(sentenceId);
+        
+        // Alle Items holen und sortieren
+        const items = Array.from(container.querySelectorAll('.clickable-item'));
+        items.sort((a, b) => a.getAttribute('data-order') - b.getAttribute('data-order'));
+
+        items.forEach(item => sentenceZone.appendChild(item));
+        
+        sentenceZone.classList.remove('incorrect');
+        sentenceZone.classList.add('correct');
+    }
+
+</script>
+
+</body>
+</html>
